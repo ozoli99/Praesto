@@ -11,6 +11,10 @@ type GormRepository struct {
 	Database *gorm.DB
 }
 
+func NewGormRepository(database *gorm.DB) *GormRepository {
+	return &GormRepository{Database: database}
+}
+
 func (repository *GormRepository) Create(appointment *Appointment) error {
 	return repository.Database.Create(appointment).Error
 }
