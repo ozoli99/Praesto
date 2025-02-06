@@ -10,3 +10,7 @@ type Appointment struct {
 	TimeSlot   time.Time `json:"time_slot"`
 	Status     string    `json:"status"`
 }
+
+func TimeNow() time.Time {
+	return time.Now()
+}

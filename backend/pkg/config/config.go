@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Port        string
-	DatabaseURL string
-	AuthDomain  string
-	PaymentsKey string
+	Port         string
+	DatabaseURL  string
+	AuthDomain   string
+	AuthAudience string
+	PaymentsKey  string
 }
 
 func Load() *Config {
