@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -25,6 +26,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		token, err := validator.ValidateRequest(context.Request)
 		if err != nil {
+			log.Printf("Auth error: %v", err)
 			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
