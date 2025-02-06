@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/ozoli99/praesto/backend/pkg/models"
+	"github.com/ozoli99/Praesto/pkg/models"
 	"gorm.io/gorm"
 )
 
