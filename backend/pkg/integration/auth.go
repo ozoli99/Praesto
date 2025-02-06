@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const ClaimsKey = "auth0_claims"
+
 func AuthMiddleware() gin.HandlerFunc {
 	domain := os.Getenv("AUTH0_DOMAIN")
 	audience := os.Getenv("AUTH0_AUDIENCE")
@@ -21,11 +23,17 @@ func AuthMiddleware() gin.HandlerFunc {
 	validator := auth0.NewValidator(configuration, nil)
 
 	return func(context *gin.Context) {
-		_, err := validator.ValidateRequest(context.Request)
+		token, err := validator.ValidateRequest(context.Request)
 		if err != nil {
 			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
+		claims := make(map[string]interface{})
+		if err := token.Claims(&claims); err != nil {
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not parse claims"})
+			return
+		}
+		context.Set(ClaimsKey, claims)
 		context.Next()
 	}
 }
