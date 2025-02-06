@@ -23,6 +23,14 @@ func (service *UserService) SyncUserFromClaims(claims map[string]interface{}) (*
 	name, _ := claims["name"].(string)
 	picture, _ := claims["picture"].(string)
 
+	var role string
+	namespace := "https://yourdomain.com/"
+	if roles, ok := claims[namespace + "roles"].([]interface{}); ok && len(roles) > 0 {
+		role, _ = roles[0].(string)
+	} else {
+		role = RoleClient
+	}
+	
 	user, err := service.repository.GetByAuth0ID(sub)
 	if err != nil {
 		newUser := &User{
