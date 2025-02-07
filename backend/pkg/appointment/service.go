@@ -31,7 +31,7 @@ func (service *AppointmentService) BookAppointment(providerID, customerID uint, 
 	if len(overlapping) > 0 {
 		return nil, errors.New("the time slot conflicts with an existing appointment")
 	}
-	
+
 	appointment := &Appointment{
 		ProviderID: providerID,
 		CustomerID: customerID,
