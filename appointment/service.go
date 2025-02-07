@@ -15,7 +15,7 @@ type Service interface {
 	CancelAppointment(appointmentID uint) error
 }
 
-type appointmentService struct {
+type AppointmentService struct {
 	Repository                Repository
 	NotificationService       notifications.NotificationService
 	CalendarConfiguration     calendars.CalendarConfig
@@ -23,7 +23,7 @@ type appointmentService struct {
 }
 
 func NewService(repository Repository, notificationService notifications.NotificationService, calendarConfiguration calendars.CalendarConfig, notificationConfiguration notifications.NotificationConfig) Service {
-	return &appointmentService{
+	return &AppointmentService{
 		Repository:                repository,
 		NotificationService:       notificationService,
 		CalendarConfiguration:     calendarConfiguration,
@@ -31,7 +31,7 @@ func NewService(repository Repository, notificationService notifications.Notific
 	}
 }
 
-func (service *appointmentService) BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error) {
+func (service *AppointmentService) BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error) {
 	overlapping, err := service.Repository.FindOverlapping(providerID, startTime, endTime)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (service *appointmentService) BookAppointment(providerID, customerID uint, 
 	return appointment, nil
 }
 
-func (service *appointmentService) RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error) {
+func (service *AppointmentService) RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error) {
 	appointment, err := service.Repository.GetByID(appointmentID)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (service *appointmentService) RescheduleAppointment(appointmentID uint, new
 	return appointment, nil
 }
 
-func (service *appointmentService) CancelAppointment(appointmentID uint) error {
+func (service *AppointmentService) CancelAppointment(appointmentID uint) error {
 	appointment, err := service.Repository.GetByID(appointmentID)
 	if err != nil {
 		return err
