@@ -10,21 +10,15 @@ import (
 	"github.com/ozoli99/Praesto/appointment"
 )
 
-type NotificationService interface {
-	SendNotification(notification Notification) error
-	ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig)
-	CancelReminder(appointment *appointment.Appointment)
-}
-
-type NotificationService struct {
+type notificationService struct {
 	Config NotificationConfig
 }
 
 func NewNotificationService(config NotificationConfig) NotificationService {
-	return &NotificationService{Config: config}
+	return &notificationService{Config: config}
 }
 
-func (service *NotificationService) SendNotification(notification Notification) error {
+func (service *notificationService) SendNotification(notification Notification) error {
 	switch notification.Channel {
 	case ChannelEmail:
 		// TODO: Integrate with an email provider (SendGrid)
@@ -77,7 +71,7 @@ func sendSMS(to string, message string, config NotificationConfig) error {
 	return nil
 }
 
-func (service *NotificationService) ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig) {
+func (service *notificationService) ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig) {
 	reminderTime := appointment.StartTime.Add(-1 * time.Hour)
 	if time.Now().After(reminderTime) {
 		toPhone := config.DummyCustomerPhone
@@ -99,7 +93,7 @@ func (service *NotificationService) ScheduleReminder(appointment *appointment.Ap
 	}
 }
 
-func (service *NotificationService) CancelReminder(appointment *appointment.Appointment) {
+func (service *notificationService) CancelReminder(appointment *appointment.Appointment) {
 	log.Printf("Canceling reminder for appointment %d", appointment.ID)
 	// TODO: Cancel the scheduled job if applicable
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ozoli99/Praesto/integration/calendars"
+	"github.com/ozoli99/Praesto/calendars"
 	"github.com/ozoli99/Praesto/notifications"
 )
 
@@ -15,15 +15,23 @@ type Service interface {
 	CancelAppointment(appointmentID uint) error
 }
 
-type AppointmentService struct {
-	Repository Repository
+type appointmentService struct {
+	Repository                Repository
+	NotificationService       notifications.NotificationService
+	CalendarConfiguration     calendars.CalendarConfig
+	NotificationConfiguration notifications.NotificationConfig
 }
 
-func NewService(repository Repository) Service {
-	return &AppointmentService{Repository: repository}
+func NewService(repository Repository, notificationService notifications.NotificationService, calendarConfiguration calendars.CalendarConfig, notificationConfiguration notifications.NotificationConfig) Service {
+	return &appointmentService{
+		Repository:                repository,
+		NotificationService:       notificationService,
+		CalendarConfiguration:     calendarConfiguration,
+		NotificationConfiguration: notificationConfiguration,
+	}
 }
 
-func (service *AppointmentService) BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error) {
+func (service *appointmentService) BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error) {
 	overlapping, err := service.Repository.FindOverlapping(providerID, startTime, endTime)
 	if err != nil {
 		return nil, err
@@ -42,12 +50,14 @@ func (service *AppointmentService) BookAppointment(providerID, customerID uint, 
 	if err := service.Repository.Create(appointment); err != nil {
 		return nil, err
 	}
-	calendars.SyncAppointmentToCalendar(appointment)
-	notifications.ScheduleReminder(appointment)
+
+	calendars.SyncAppointmentToCalendar(appointment, service.CalendarConfiguration)
+	service.NotificationService.ScheduleReminder(appointment, service.NotificationConfiguration)
+
 	return appointment, nil
 }
 
-func (service *AppointmentService) RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error) {
+func (service *appointmentService) RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error) {
 	appointment, err := service.Repository.GetByID(appointmentID)
 	if err != nil {
 		return nil, err
@@ -69,12 +79,14 @@ func (service *AppointmentService) RescheduleAppointment(appointmentID uint, new
 	if err := service.Repository.Update(appointment); err != nil {
 		return nil, err
 	}
-	calendars.SyncAppointmentToCalendar(appointment)
-	notifications.ScheduleReminder(appointment)
+
+	calendars.SyncAppointmentToCalendar(appointment, service.CalendarConfiguration)
+	service.NotificationService.ScheduleReminder(appointment, service.NotificationConfiguration)
+
 	return appointment, nil
 }
 
-func (service *AppointmentService) CancelAppointment(appointmentID uint) error {
+func (service *appointmentService) CancelAppointment(appointmentID uint) error {
 	appointment, err := service.Repository.GetByID(appointmentID)
 	if err != nil {
 		return err
@@ -83,7 +95,9 @@ func (service *AppointmentService) CancelAppointment(appointmentID uint) error {
 	if err := service.Repository.Update(appointment); err != nil {
 		return err
 	}
+
 	calendars.RemoveAppointmentFromCalendar(appointment)
-	notifications.CancelReminder(appointment)
+	service.NotificationService.CancelReminder(appointment)
+
 	return nil
 }
