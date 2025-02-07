@@ -1,4 +1,4 @@
-package integration
+package calendars
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func SyncAppointmentToCalendar(appointment *appointment.Appointment) {
 	}
 
 	event := &calendar.Event{
-		Summary: "Appointment",
+		Summary:     "Appointment",
 		Description: "Service appointment",
 		Start: &calendar.EventDateTime{
 			DateTime: appointment.StartTime.Format(time.RFC3339),

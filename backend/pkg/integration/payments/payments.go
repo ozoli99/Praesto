@@ -1,4 +1,4 @@
-package integration
+package payments
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ func ListDisputes(limit int) ([]*stripe.Dispute, error) {
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	params := &stripe.DisputeListParams{}
 	params.Filters.AddFilter("limit", "", fmt.Sprintf("%d", limit))
-	
+
 	i := dispute.List(params)
 	var disputes []*stripe.Dispute
 	for i.Next() {
