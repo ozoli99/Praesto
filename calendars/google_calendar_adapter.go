@@ -2,20 +2,15 @@ package calendars
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
+	"errors"
 
 	"github.com/ozoli99/Praesto/types"
 
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 )
-
-type CalendarAdapter interface {
-	SyncAppointment(appointment types.AppointmentData) error
-	RemoveAppointment(appointment types.AppointmentData) error
-}
 
 type GoogleCalendarAdapter struct {
 	CalendarService *calendar.Service
@@ -24,7 +19,7 @@ type GoogleCalendarAdapter struct {
 
 func NewGoogleCalendarAdapter(config CalendarConfig) (CalendarAdapter, error) {
 	if config.CredentialsFile == "" {
-		return nil, errors.New("Credentials file not provided")
+		return nil, errors.New("missing Google Calendar credentials")
 	}
 	context := context.Background()
 	service, err := calendar.NewService(context, option.WithCredentialsFile(config.CredentialsFile))
@@ -40,12 +35,13 @@ func NewGoogleCalendarAdapter(config CalendarConfig) (CalendarAdapter, error) {
 func (adapter *GoogleCalendarAdapter) SyncAppointment(appointment types.AppointmentData) error {
 	if adapter.CalendarService == nil {
 		log.Println("Calendar service not initialized")
-		return errors.New("Calendar service not initialized")
+		return nil
 	}
 	if adapter.Configuration.CalendarID == "" {
 		log.Println("CalendarID not provided in configuration")
-		return errors.New("CalendarID not provided in configuration")
+		return nil
 	}
+
 	event := &calendar.Event{
 		Summary: "Appointment",
 		Description: "Service appointment",
@@ -63,15 +59,15 @@ func (adapter *GoogleCalendarAdapter) SyncAppointment(appointment types.Appointm
 		log.Printf("Unable to create event: %v", err)
 		return err
 	}
-	log.Printf("Event created: %s", createdEvent.HtmlLink)
+	log.Printf("Google Calendar event created: %s", createdEvent.HtmlLink)
 	return nil
 }
 
 func (adapter *GoogleCalendarAdapter) RemoveAppointment(appointment types.AppointmentData) error {
 	if adapter.CalendarService == nil {
 		log.Println("Calendar service not initialized")
-		return errors.New("Calendar service not initialized")
+		return nil
 	}
-	log.Printf("RemoveAppointment: Not implemented because event ID is not stored for appointment %d", appointment.GetID())
+	log.Printf("Google Calendar: RemoveAppointment not implemented for appointment %d", appointment.GetID())
 	return nil
 }

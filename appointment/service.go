@@ -18,15 +18,15 @@ type Service interface {
 type AppointmentService struct {
 	Repository                Repository
 	NotificationService       notifications.NotificationService
-	CalendarConfiguration     calendars.CalendarConfig
+	CalendarAdapter           calendars.CalendarAdapter
 	NotificationConfiguration notifications.NotificationConfig
 }
 
-func NewService(repository Repository, notificationService notifications.NotificationService, calendarConfiguration calendars.CalendarConfig, notificationConfiguration notifications.NotificationConfig) Service {
+func NewService(repository Repository, notificationService notifications.NotificationService, calendarAdapter calendars.CalendarAdapter, notificationConfiguration notifications.NotificationConfig) Service {
 	return &AppointmentService{
 		Repository:                repository,
 		NotificationService:       notificationService,
-		CalendarConfiguration:     calendarConfiguration,
+		CalendarAdapter:           calendarAdapter,
 		NotificationConfiguration: notificationConfiguration,
 	}
 }
@@ -51,7 +51,9 @@ func (service *AppointmentService) BookAppointment(providerID, customerID uint, 
 		return nil, err
 	}
 
-	calendars.SyncAppointmentToCalendar(appointment, service.CalendarConfiguration)
+	if err := service.CalendarAdapter.SyncAppointment(appointment); err != nil {
+		fmt.Printf("calendar sync error: %v\n", err)
+	}
 	service.NotificationService.ScheduleReminder(appointment, service.NotificationConfiguration)
 
 	return appointment, nil
@@ -80,7 +82,9 @@ func (service *AppointmentService) RescheduleAppointment(appointmentID uint, new
 		return nil, err
 	}
 
-	calendars.SyncAppointmentToCalendar(appointment, service.CalendarConfiguration)
+	if err := service.CalendarAdapter.SyncAppointment(appointment); err != nil {
+		fmt.Printf("calendar sync error: %v\n", err)
+	}
 	service.NotificationService.ScheduleReminder(appointment, service.NotificationConfiguration)
 
 	return appointment, nil
@@ -96,7 +100,9 @@ func (service *AppointmentService) CancelAppointment(appointmentID uint) error {
 		return err
 	}
 
-	calendars.RemoveAppointmentFromCalendar(appointment)
+	if err := service.CalendarAdapter.RemoveAppointment(appointment); err != nil {
+		fmt.Printf("calendar removal error: %v\n", err)
+	}
 	service.NotificationService.CancelReminder(appointment)
 
 	return nil
