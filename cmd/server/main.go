@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ozoli99/Praesto/pkg/appointment"
-	"github.com/ozoli99/Praesto/pkg/config"
+	"github.com/ozoli99/Praesto/appointment"
+	"github.com/ozoli99/Praesto/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

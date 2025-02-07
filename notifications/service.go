@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/appointment"
+	"github.com/ozoli99/Praesto/appointment"
 )
 
 type NotificationService interface {

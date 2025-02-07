@@ -3,7 +3,7 @@ package appointment
 import (
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/models"
+	"github.com/ozoli99/Praesto/models"
 )
 
 type AppointmentStatus string

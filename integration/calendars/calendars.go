@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/appointment"
+	"github.com/ozoli99/Praesto/appointment"
 
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"

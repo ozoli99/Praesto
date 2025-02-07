@@ -3,7 +3,7 @@ package session
 import (
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/models"
+	"github.com/ozoli99/Praesto/models"
 )
 
 type Session struct {

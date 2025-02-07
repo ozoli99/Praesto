@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/integration"
-	"github.com/ozoli99/Praesto/pkg/notifications"
+	"github.com/ozoli99/Praesto/integration/calendars"
+	"github.com/ozoli99/Praesto/notifications"
 )
 
 type Service interface {
@@ -42,7 +42,7 @@ func (service *AppointmentService) BookAppointment(providerID, customerID uint, 
 	if err := service.Repository.Create(appointment); err != nil {
 		return nil, err
 	}
-	integration.SyncAppointmentToCalendar(appointment)
+	calendars.SyncAppointmentToCalendar(appointment)
 	notifications.ScheduleReminder(appointment)
 	return appointment, nil
 }
@@ -69,7 +69,7 @@ func (service *AppointmentService) RescheduleAppointment(appointmentID uint, new
 	if err := service.Repository.Update(appointment); err != nil {
 		return nil, err
 	}
-	integration.SyncAppointmentToCalendar(appointment)
+	calendars.SyncAppointmentToCalendar(appointment)
 	notifications.ScheduleReminder(appointment)
 	return appointment, nil
 }
@@ -83,7 +83,7 @@ func (service *AppointmentService) CancelAppointment(appointmentID uint) error {
 	if err := service.Repository.Update(appointment); err != nil {
 		return err
 	}
-	integration.RemoveAppointmentFromCalendar(appointment)
+	calendars.RemoveAppointmentFromCalendar(appointment)
 	notifications.CancelReminder(appointment)
 	return nil
 }

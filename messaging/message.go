@@ -3,7 +3,7 @@ package messaging
 import (
 	"time"
 
-	"github.com/ozoli99/Praesto/pkg/models"
+	"github.com/ozoli99/Praesto/models"
 )
 
 type Message struct {
