@@ -3,7 +3,7 @@ package auth
 import (
 	"log"
 	"net/http"
-	"os"
+	"fmt"
 
 	"github.com/auth0-community/go-auth0"
 	"github.com/gin-gonic/gin"
@@ -11,16 +11,14 @@ import (
 
 const ClaimsKey = "auth0_claims"
 
-func AuthMiddleware() gin.HandlerFunc {
-	domain := os.Getenv("AUTH0_DOMAIN")
-	audience := os.Getenv("AUTH0_AUDIENCE")
-	if domain == "" || audience == "" {
-		panic("AUTH0_DOMAIN or AUTH0_AUDIENCE environment variable not set")
+func AuthMiddleware(authConfig AuthConfig) gin.HandlerFunc {
+	if authConfig.Domain == "" || authConfig.Audience == "" {
+		panic("Auth configuration missing: Domain or Audience is not set")
 	}
 
-	jwkURL := "https://" + domain + "/.well-known/jwks.json"
+	jwkURL := fmt.Sprintf("https://%s/.well-known/jwks.json", authConfig.Domain)
 	client := auth0.NewJWKClient(auth0.JWKClientOptions{URI: jwkURL}, nil)
-	configuration := auth0.NewConfiguration(client, []string{audience}, "https://" + domain + "/", "RS256")
+	configuration := auth0.NewConfiguration(client, []string{authConfig.Audience}, fmt.Sprintf("https://%s/", authConfig.Domain), "RS256")
 	validator := auth0.NewValidator(configuration, nil)
 
 	return func(context *gin.Context) {
