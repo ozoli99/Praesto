@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -13,12 +12,16 @@ import (
 
 type NotificationService interface {
 	SendNotification(notification Notification) error
+	ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig)
+	CancelReminder(appointment *appointment.Appointment)
 }
 
-type NotificationService struct{}
+type NotificationService struct {
+	Config NotificationConfig
+}
 
-func NewNotificationService() NotificationService {
-	return &NotificationService{}
+func NewNotificationService(config NotificationConfig) NotificationService {
+	return &NotificationService{Config: config}
 }
 
 func (service *NotificationService) SendNotification(notification Notification) error {
@@ -27,7 +30,7 @@ func (service *NotificationService) SendNotification(notification Notification) 
 		// TODO: Integrate with an email provider (SendGrid)
 		log.Printf("Sending Email to %s: %s - %s", notification.Recipient, notification.Title, notification.Message)
 	case ChannelSMS:
-		if err := sendSMS(notification.Recipient, notification.Message); err != nil {
+		if err := sendSMS(notification.Recipient, notification.Message, service.Config); err != nil {
 			log.Printf("Error sending SMS to %s: %v", notification.Recipient, err)
 			return err
 		}
@@ -40,18 +43,15 @@ func (service *NotificationService) SendNotification(notification Notification) 
 	return nil
 }
 
-func sendSMS(to string, message string) error {
-	accountSID := os.Getenv("TWILIO_ACCOUNT_SID")
-	authToken := os.Getenv("TWILIO_AUTH_TOKEN")
-	fromPhone := os.Getenv("TWILIO_FROM_PHONE")
-	if accountSID == "" || authToken == "" || fromPhone == "" {
+func sendSMS(to string, message string, config NotificationConfig) error {
+	if config.TwilioAccountSID == "" || config.TwilioAuthToken == "" || config.TwilioFromPhone == "" {
 		log.Println("Twilio configuration not set; cannot send SMS")
 		return nil
 	}
 
-	apiURL := "https://api.twilio.com/2010-04-01/Accounts/" + accountSID + "/Messages.json"
+	apiURL := "https://api.twilio.com/2010-04-01/Accounts/" + config.TwilioAccountSID + "/Messages.json"
 	data := url.Values{}
-	data.Set("From", fromPhone)
+	data.Set("From", config.TwilioFromPhone)
 	data.Set("To", to)
 	data.Set("Body", message)
 
@@ -59,7 +59,7 @@ func sendSMS(to string, message string) error {
 	if err != nil {
 		return err
 	}
-	request.SetBasicAuth(accountSID, authToken)
+	request.SetBasicAuth(config.TwilioAccountSID, config.TwilioAuthToken)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{}
@@ -77,15 +77,21 @@ func sendSMS(to string, message string) error {
 	return nil
 }
 
-func ScheduleReminder(appointment *appointment.Appointment) {
+func (service *NotificationService) ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig) {
 	reminderTime := appointment.StartTime.Add(-1 * time.Hour)
 	if time.Now().After(reminderTime) {
-		toPhone := os.Getenv("DUMMY_CUSTOMER_PHONE") // Retrieve a dummy phone number for testing or pull it from appointment data
+		toPhone := config.DummyCustomerPhone
 		if toPhone == "" {
 			toPhone = "+1234567890"
 		}
 		message := "Reminder: You have an appointment scheduled at " + appointment.StartTime.Format(time.RFC1123)
-		if err := sendSMS(toPhone, message); err != nil {
+		notification := Notification{
+			Title:     "Appointment Reminder",
+			Message:   message,
+			Channel:   ChannelSMS,
+			Recipient: toPhone,
+		}
+		if err := service.SendNotification(notification); err != nil {
 			log.Printf("Error sending SMS reminder: %v", err)
 		}
 	} else {
@@ -93,7 +99,7 @@ func ScheduleReminder(appointment *appointment.Appointment) {
 	}
 }
 
-func CancelReminder(appointment *appointment.Appointment) {
+func (service *NotificationService) CancelReminder(appointment *appointment.Appointment) {
 	log.Printf("Canceling reminder for appointment %d", appointment.ID)
 	// TODO: Cancel the scheduled job if applicable
 }
