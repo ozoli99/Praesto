@@ -2,6 +2,7 @@ package appointment
 
 import (
 	"time"
+
 	"github.com/ozoli99/Praesto/pkg/models"
 )
 
@@ -20,8 +21,4 @@ type Appointment struct {
 	StartTime  time.Time         `json:"start_time"`
 	EndTime    time.Time         `json:"end_time"`
 	Status     AppointmentStatus `json:"status"`
-}
-
-func TimeNow() time.Time {
-	return time.Now()
 }

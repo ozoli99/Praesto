@@ -1,6 +1,8 @@
 package appointment
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ozoli99/Praesto/pkg/integration"
@@ -9,7 +11,7 @@ import (
 
 type Service interface {
 	BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error)
-	RescheduleAppointment(appointmentID uint, newStart, newEnd time.Time) (*Appointment, error)
+	RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error)
 	CancelAppointment(appointmentID uint) error
 }
 
@@ -22,6 +24,14 @@ func NewService(repository Repository) Service {
 }
 
 func (service *AppointmentService) BookAppointment(providerID, customerID uint, startTime, endTime time.Time) (*Appointment, error) {
+	overlapping, err := service.Repository.FindOverlapping(providerID, startTime, endTime)
+	if err != nil {
+		return nil, err
+	}
+	if len(overlapping) > 0 {
+		return nil, errors.New("the time slot conflicts with an existing appointment")
+	}
+	
 	appointment := &Appointment{
 		ProviderID: providerID,
 		CustomerID: customerID,
@@ -37,13 +47,24 @@ func (service *AppointmentService) BookAppointment(providerID, customerID uint, 
 	return appointment, nil
 }
 
-func (service *AppointmentService) RescheduleAppointment(appointmentID uint, newStart, newEnd time.Time) (*Appointment, error) {
+func (service *AppointmentService) RescheduleAppointment(appointmentID uint, newStartTime, newEndTime time.Time) (*Appointment, error) {
 	appointment, err := service.Repository.GetByID(appointmentID)
 	if err != nil {
 		return nil, err
 	}
-	appointment.StartTime = newStart
-	appointment.EndTime = newEnd
+
+	overlapping, err := service.Repository.FindOverlapping(appointment.ProviderID, newStartTime, newEndTime)
+	if err != nil {
+		return nil, err
+	}
+	for _, appt := range overlapping {
+		if appt.ID != appointment.ID {
+			return nil, fmt.Errorf("the new time slot conflicts with an existing appointment")
+		}
+	}
+
+	appointment.StartTime = newStartTime
+	appointment.EndTime = newEndTime
 	appointment.Status = StatusRescheduled
 	if err := service.Repository.Update(appointment); err != nil {
 		return nil, err
