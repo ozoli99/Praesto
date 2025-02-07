@@ -3,7 +3,6 @@ package calendars
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"github.com/ozoli99/Praesto/appointment"
@@ -14,14 +13,13 @@ import (
 
 var calendarService *calendar.Service
 
-func init() {
-	context := context.Background()
-	credFile := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if credFile == "" {
-		log.Println("GOOGLE_APPLICATION_CREDENTIALS not set; calendar integration will be disabled")
+func InitCalendarService(calendarConfig CalendarConfig) {
+	if calendarConfig.CredentialsFile == "" {
+		log.Println("Credentials file not provided; calendar integration disabled")
 		return
 	}
-	service, err := calendar.NewService(context, option.WithCredentialsFile(credFile))
+	context := context.Background()
+	service, err := calendar.NewService(context, option.WithCredentialsFile(calendarConfig.CredentialsFile))
 	if err != nil {
 		log.Printf("Unable to create Google Calendar service: %v", err)
 		return
@@ -29,14 +27,13 @@ func init() {
 	calendarService = service
 }
 
-func SyncAppointmentToCalendar(appointment *appointment.Appointment) {
+func SyncAppointmentToCalendar(appointment *appointment.Appointment, calendarConfig CalendarConfig) {
 	if calendarService == nil {
 		log.Println("Calendar service not initialized")
 		return
 	}
-	calendarID := os.Getenv("GOOGLE_CALENDAR_ID")
-	if calendarID == "" {
-		log.Println("GOOGLE_CALENDAR_ID not set")
+	if calendarConfig.CalendarID == "" {
+		log.Println("CalendarID not provided in config")
 		return
 	}
 
@@ -52,7 +49,7 @@ func SyncAppointmentToCalendar(appointment *appointment.Appointment) {
 			TimeZone: "UTC",
 		},
 	}
-	createdEvent, err := calendarService.Events.Insert(calendarID, event).Do()
+	createdEvent, err := calendarService.Events.Insert(calendarConfig.CalendarID, event).Do()
 	if err != nil {
 		log.Printf("Unable to create event: %v", err)
 		return
