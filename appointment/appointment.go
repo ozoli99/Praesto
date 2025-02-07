@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/ozoli99/Praesto/models"
+	"github.com/ozoli99/Praesto/types"
 )
 
 type AppointmentStatus string
@@ -22,3 +23,17 @@ type Appointment struct {
 	EndTime    time.Time         `json:"end_time"`
 	Status     AppointmentStatus `json:"status"`
 }
+
+func (appointment *Appointment) GetStartTime() time.Time {
+	return appointment.StartTime
+}
+
+func (appointment *Appointment) GetEndTime() time.Time {
+	return appointment.EndTime
+}
+
+func (appointment *Appointment) GetID() uint {
+	return appointment.ID
+}
+
+var _ types.AppointmentData = (*Appointment)(nil)

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ozoli99/Praesto/appointment"
+	"github.com/ozoli99/Praesto/types"
 
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
@@ -27,7 +27,7 @@ func InitCalendarService(calendarConfig CalendarConfig) {
 	calendarService = service
 }
 
-func SyncAppointmentToCalendar(appointment *appointment.Appointment, calendarConfig CalendarConfig) {
+func SyncAppointmentToCalendar(appointment types.AppointmentData, calendarConfig CalendarConfig) {
 	if calendarService == nil {
 		log.Println("Calendar service not initialized")
 		return
@@ -41,11 +41,11 @@ func SyncAppointmentToCalendar(appointment *appointment.Appointment, calendarCon
 		Summary:     "Appointment",
 		Description: "Service appointment",
 		Start: &calendar.EventDateTime{
-			DateTime: appointment.StartTime.Format(time.RFC3339),
+			DateTime: appointment.GetStartTime().Format(time.RFC3339),
 			TimeZone: "UTC",
 		},
 		End: &calendar.EventDateTime{
-			DateTime: appointment.EndTime.Format(time.RFC3339),
+			DateTime: appointment.GetEndTime().Format(time.RFC3339),
 			TimeZone: "UTC",
 		},
 	}
@@ -57,10 +57,10 @@ func SyncAppointmentToCalendar(appointment *appointment.Appointment, calendarCon
 	log.Printf("Event created: %s", createdEvent.HtmlLink)
 }
 
-func RemoveAppointmentFromCalendar(appointment *appointment.Appointment) {
+func RemoveAppointmentFromCalendar(appointment types.AppointmentData) {
 	if calendarService == nil {
 		log.Println("Calendar service not initialized")
 		return
 	}
-	log.Printf("RemoveAppointmentFromCalendar: Not implemented because event ID is not stored for appointment %d", appointment.ID)
+	log.Printf("RemoveAppointmentFromCalendar: Not implemented because event ID is not stored for appointment %d", appointment.GetID())
 }

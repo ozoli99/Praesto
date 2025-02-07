@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ozoli99/Praesto/appointment"
+	"github.com/ozoli99/Praesto/types"
 )
 
 type notificationService struct {
@@ -71,14 +71,14 @@ func sendSMS(to string, message string, config NotificationConfig) error {
 	return nil
 }
 
-func (service *notificationService) ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig) {
-	reminderTime := appointment.StartTime.Add(-1 * time.Hour)
+func (service *notificationService) ScheduleReminder(appointment types.AppointmentData, config NotificationConfig) {
+	reminderTime := appointment.GetStartTime().Add(-1 * time.Hour)
 	if time.Now().After(reminderTime) {
 		toPhone := config.DummyCustomerPhone
 		if toPhone == "" {
 			toPhone = "+1234567890"
 		}
-		message := "Reminder: You have an appointment scheduled at " + appointment.StartTime.Format(time.RFC1123)
+		message := "Reminder: You have an appointment scheduled at " + appointment.GetStartTime().Format(time.RFC1123)
 		notification := Notification{
 			Title:     "Appointment Reminder",
 			Message:   message,
@@ -89,11 +89,11 @@ func (service *notificationService) ScheduleReminder(appointment *appointment.Ap
 			log.Printf("Error sending SMS reminder: %v", err)
 		}
 	} else {
-		log.Printf("Scheduled reminder for appointment %d at %v", appointment.ID, reminderTime)
+		log.Printf("Scheduled reminder for appointment %d at %v", appointment.GetID(), reminderTime)
 	}
 }
 
-func (service *notificationService) CancelReminder(appointment *appointment.Appointment) {
-	log.Printf("Canceling reminder for appointment %d", appointment.ID)
+func (service *notificationService) CancelReminder(appointment types.AppointmentData) {
+	log.Printf("Canceling reminder for appointment %d", appointment.GetID())
 	// TODO: Cancel the scheduled job if applicable
 }

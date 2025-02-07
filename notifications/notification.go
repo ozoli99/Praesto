@@ -1,7 +1,7 @@
 package notifications
 
 import (
-	"github.com/ozoli99/Praesto/appointment"
+	"github.com/ozoli99/Praesto/types"
 )
 
 type NotificationChannel int
@@ -21,6 +21,6 @@ type Notification struct {
 
 type NotificationService interface {
 	SendNotification(notification Notification) error
-	ScheduleReminder(appointment *appointment.Appointment, config NotificationConfig)
-	CancelReminder(appointment *appointment.Appointment)
+	ScheduleReminder(appointment types.AppointmentData, config NotificationConfig)
+	CancelReminder(appointment types.AppointmentData)
 }
