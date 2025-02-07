@@ -2,14 +2,43 @@ package notifications
 
 import (
 	"log"
-	"time"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ozoli99/Praesto/pkg/appointment"
 )
+
+type NotificationService interface {
+	SendNotification(notification Notification) error
+}
+
+type NotificationService struct{}
+
+func NewNotificationService() NotificationService {
+	return &NotificationService{}
+}
+
+func (service *NotificationService) SendNotification(notification Notification) error {
+	switch notification.Channel {
+	case ChannelEmail:
+		// TODO: Integrate with an email provider (SendGrid)
+		log.Printf("Sending Email to %s: %s - %s", notification.Recipient, notification.Title, notification.Message)
+	case ChannelSMS:
+		if err := sendSMS(notification.Recipient, notification.Message); err != nil {
+			log.Printf("Error sending SMS to %s: %v", notification.Recipient, err)
+			return err
+		}
+	case ChannelPush:
+		// TODO: Integrate with a push notification provider (Firebase Cloud Messaging)
+		log.Printf("Sending Push Notification to %s: %s - %s", notification.Recipient, notification.Title, notification.Message)
+	default:
+		log.Printf("Unknown notification channel for recipient %s", notification.Recipient)
+	}
+	return nil
+}
 
 func sendSMS(to string, message string) error {
 	accountSID := os.Getenv("TWILIO_ACCOUNT_SID")
@@ -56,7 +85,7 @@ func ScheduleReminder(appointment *appointment.Appointment) {
 			toPhone = "+1234567890"
 		}
 		message := "Reminder: You have an appointment scheduled at " + appointment.StartTime.Format(time.RFC1123)
-		if er := sendSMS(toPhone, message); err != nil {
+		if err := sendSMS(toPhone, message); err != nil {
 			log.Printf("Error sending SMS reminder: %v", err)
 		}
 	} else {
