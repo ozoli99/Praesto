@@ -2,10 +2,11 @@ package calendars
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -61,7 +62,7 @@ func (adapter *OutlookCalendarAdapter) SyncAppointment(appointment types.Appoint
 	// Build the Graph API URL. For the default calendar, the endpoint is typically:
 	// https://graph.microsoft.com/v1.0/me/calendars/{calendarID}/events
 	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/me/calendars/%s/events", adapter.Configuration.CalendarID)
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	request, err := http.NewRequestWithContext(context.Background(), "POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return err
 	}
@@ -75,11 +76,11 @@ func (adapter *OutlookCalendarAdapter) SyncAppointment(appointment types.Appoint
 	defer response.Body.Close()
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		body, _ := ioutil.ReadAll(response.Body)
+		body, _ := io.ReadAll(response.Body)
 		return fmt.Errorf("outlook API error: %s", string(body))
 	}
-	body, _ := ioutil.ReadAll(response.Body)
-	log.Printf("Outlook event created: %s", body)
+	body, _ := io.ReadAll(response.Body)
+	log.Printf("outlook event created: %s", body)
 	return nil
 }
 

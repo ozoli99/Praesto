@@ -16,12 +16,6 @@ func NewCalendarAdapter(adapterFlag string, config interface{}) (CalendarAdapter
 				return nil, errors.New("invalid configuration for Outlook Calendar adapter")
 			}
 			return NewOutlookCalendarAdapter(outlookConfig)
-		case "apple":
-			appleConfig, ok := config.(AppleCalendarConfig)
-			if !ok {
-				return nil, errors.New("invalid configuration for Apple Calendar adapter")
-			}
-			return NewAppleCalendarAdapter(appleConfig)
 		default:
 			return nil, errors.New("unknown calendar adapter")
 	}

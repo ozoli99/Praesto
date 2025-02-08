@@ -14,7 +14,7 @@ func NewPaymentAdapter(adapterFlag, secretKey string) (PaymentAdapter, error) {
 		case "stripe":
 			return NewStripeAdapter(secretKey), nil
 		case "paypal":
-			return nil, errors.New("PayPal adapter not implemented yet")
+			return NewPayPalAdapter(secretKey)
 		default:
 			return nil, errors.New("Unknown payment adapter")
 	}
