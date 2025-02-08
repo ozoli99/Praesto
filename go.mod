@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/auth0-community/go-auth0 v1.0.0
+	github.com/clerkinc/clerk-sdk-go v1.49.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/plutov/paypal/v4 v4.11.0
 	github.com/spf13/viper v1.10.1
@@ -16,6 +17,7 @@ require (
 	cloud.google.com/go v0.99.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
