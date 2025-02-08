@@ -9,7 +9,7 @@ func NewAuthAdapterFactory(provider string, config interface{}) (AuthAdapter, er
 			if !ok {
 				return nil, errors.New("invalid configuration for Auth0 adapter")
 			}
-			return NewAuth0Adapter(auth0Config), nil
+			return NewAuth0Adapter(auth0Config)
 		case "clerk":
 			clerkConfig, ok := config.(ClerkConfig)
 			if !ok {
