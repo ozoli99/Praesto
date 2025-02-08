@@ -13,11 +13,11 @@ import (
 )
 
 type Auth0Config struct {
-	Domain       string
-	ClientID     string
-	ClientSecret string
-	CallbackURL  string
-	Audience     string
+	Domain       string // e.g., "dev-63lnnyvm5sp0cz2o.eu.auth0.com"
+	ClientID     string // Auth0 Application Client ID
+	ClientSecret string // Auth0 Application Client Secret
+	CallbackURL  string // e.g., "http://localhost:3000/callback"
+	Audience     string // API identifier (audience)
 }
 
 type Auth0Adapter struct {
@@ -31,18 +31,18 @@ func NewAuth0Adapter(config Auth0Config) (AuthAdapter, error) {
 		return nil, errors.New("incomplete Auth0 configuration")
 	}
 
-	context := context.Background()
-	provider, err := oidc.NewProvider(context, fmt.Sprintf("https://%s/", config.Domain))
+	ctx := context.Background()
+	provider, err := oidc.NewProvider(ctx, fmt.Sprintf("https://%s/", config.Domain))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OIDC provider: %w", err)
 	}
 
 	oauth2Config := oauth2.Config{
-		ClientID: config.ClientID,
+		ClientID:     config.ClientID,
 		ClientSecret: config.ClientSecret,
-		RedirectURL: config.CallbackURL,
-		Endpoint: provider.Endpoint(),
-		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+		RedirectURL:  config.CallbackURL,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
 	verifier := provider.Verifier(&oidc.Config{
@@ -50,9 +50,9 @@ func NewAuth0Adapter(config Auth0Config) (AuthAdapter, error) {
 	})
 
 	return &Auth0Adapter{
-		Provider: provider,
+		Provider:     provider,
 		OAuth2Config: oauth2Config,
-		Verifier: verifier,
+		Verifier:     verifier,
 	}, nil
 }
 
