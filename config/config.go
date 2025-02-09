@@ -31,7 +31,7 @@ func Load(configFile string) *Configuration {
 		log.Printf("No configuration file found, reading from environment: %v", err)
 	}
 
-	return &Configuration{
+	configuration := &Configuration{
 		Port:             viper.GetString("PORT"),
 		DatabaseURL:      viper.GetString("DATABASE_URL"),
 		AuthDomain:       viper.GetString("AUTH0_DOMAIN"),
@@ -47,4 +47,7 @@ func Load(configFile string) *Configuration {
 		TwilioAuthToken:  viper.GetString("TWILIO_AUTH_TOKEN"),
 		TwilioFromPhone:  viper.GetString("TWILIO_FROM_PHONE"),
 	}
+
+	log.Printf("Loaded DatabaseURL: %s", configuration.DatabaseURL)
+	return configuration
 }
