@@ -11,6 +11,9 @@ type Configuration struct {
 	DatabaseURL      string
 	AuthDomain       string
 	AuthAudience     string
+	AuthClientID     string
+	AuthClientSecret string
+	AuthCallbackURL  string
 	StripeSecretKey  string
 	PaymentAdapter   string
 	GoogleCredFile   string
@@ -33,6 +36,9 @@ func Load(configFile string) *Configuration {
 		DatabaseURL:      viper.GetString("DATABASE_URL"),
 		AuthDomain:       viper.GetString("AUTH0_DOMAIN"),
 		AuthAudience:     viper.GetString("AUTH0_AUDIENCE"),
+		AuthClientID:     viper.GetString("AUTH0_CLIENT_ID"),
+		AuthClientSecret: viper.GetString("AUTH0_CLIENT_SECRET"),
+		AuthCallbackURL:  viper.GetString("AUTH0_CALLBACK_URL"),
 		StripeSecretKey:  viper.GetString("STRIPE_SECRET_KEY"),
 		PaymentAdapter:   viper.GetString("PAYMENT_ADAPTER"),
 		GoogleCredFile:   viper.GetString("GOOGLE_APPLICATION_CREDENTIALS"),
